@@ -3,13 +3,23 @@
 namespace Domnyus\Routes;
 use Domnyus\Route;
 use Domnyus\Constants;
-use Domnyus\Model\Login;
+use Domnyus\Models\Login;
+use Domnyus\Models\API_ROUTES;
 use Exception;
 
 class _Login extends Route {
     public function __construct()
     {
         parent::__construct();
+        $routes = (new API_ROUTES())->select([
+            "file" => basename(__CLASS__)
+        ]);
+        /**
+         * @var API_ROUTES $route
+         */
+        foreach ($routes as $route) {
+            $this->add_route($route->get_method() ?? "GET", $route->get_route());
+        }
     }
 
     public function get() : void
@@ -22,7 +32,27 @@ class _Login extends Route {
                 throw new Exception("Login not found!", Constants::BAD_REQUEST);
             }
         } else {
-            $data = (new Login())->select(use_parser: true);
+            $data = $login->select(use_parser: true, limit: $this->page_size, offset: $this->page_index * $this->page_size);
+            $this->page_rows = count($data);
+            $this->total_rows = $login->___get_total_count();
+        }
+
+        $this->set_route_response(return: $data);
+    }
+
+    public function exemple() : void
+    {
+        $login = new Login();
+
+        if (isset($this->data["id"])) {
+            $data = $login->find_by_id($this->data["id"])->parser();
+            if (empty($login->get_id())) {
+                throw new Exception("Login not found!", Constants::BAD_REQUEST);
+            }
+        } else {
+            $data = $login->select(use_parser: true, limit: $this->page_size, offset: $this->page_index * $this->page_size);
+            $this->page_rows = count($data);
+            $this->total_rows = $login->___get_total_count();
         }
 
         $this->set_route_response(return: $data);

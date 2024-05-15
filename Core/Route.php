@@ -17,6 +17,10 @@ class Route {
     protected mixed $return;
     protected ?array $errors;
     protected ?int $status_code;
+    protected ?int $page_size;
+    protected ?int $page_index;
+    protected ?int $page_rows;
+    protected ?int $total_rows;
     public function __construct()
     {
         $this->get = [
@@ -67,6 +71,9 @@ class Route {
 
         $this->config_data();
 
+        $this->page_size = $this->data["___page_size"] ?? null;
+        $this->page_index = $this->data["___page_index"] ?? null;
+
         $this->{$method_name}();
 
         $return = [
@@ -76,6 +83,19 @@ class Route {
             "errors" => $this->errors,
             "status_code" => $this->status_code,
         ];
+
+        if (isset($this->page_index)) {
+            $return["page_index"] = $this->page_index;
+        }
+        if (isset($this->page_size)) {
+            $return["page_size"] = $this->page_size;
+        }
+        if (isset($this->page_rows)) {
+            $return["page_rows"] = $this->page_rows;
+        }
+        if (isset($this->total_rows)) {
+            $return["total_rows"] = $this->total_rows;
+        }
 
         return array_filter($return, function ($key) {
             return isset($key);
@@ -158,7 +178,7 @@ class Route {
         if (!isset($this->{strtolower($http_method)})) {
             throw new \Exception("This HTTP method does not exists", Constants::BAD_REQUEST);
         }
-
+    
         $this->{strtolower($http_method)}[strtolower($route_name)] = isset($method) ? strtolower($method) : strtolower($route_name);
     }
 

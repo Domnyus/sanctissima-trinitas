@@ -12,13 +12,18 @@ class Path
     public function check_path() : string
     {
         foreach ($this->paths as $key => $value) {
-            $uri = explode("/", $_SERVER["REQUEST_URI"]);
+            $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
+            $uri = explode("/", $uri);
             $path_uri = explode("/", $key);
             $path_data = [];
             $matches = true;
 
             for ($i = 0; $i < count($uri); $i++)
             {
+                if (!array_key_exists($i, $path_uri)) {
+                    $matches = false;
+                    continue;
+                }
                 if (strstr($path_uri[$i], ":"))
                 {
                     $path_data[str_replace(":", "", $path_uri[$i])] = $uri[$i];

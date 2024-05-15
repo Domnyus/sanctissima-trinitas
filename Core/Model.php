@@ -9,19 +9,32 @@ use PDO;
 class Model
 {
     protected string $__table_name__ = "";
-    protected PDO $pdo;
+    protected ?int $___total_count;
+    protected PDO $___pdo___;
+    protected ?array $___not_columns___ = [
+        "__table_name__",
+        "___pdo___",
+        "___total_count",
+        "___not_columns___"
+    ];
+
     public function __construct(?string $__table_name__ = null)
     {
         $this->__table_name__ = $__table_name__;
-        $this->pdo = new PDO("mysql:host=" . Constants::DBHOST . ";dbname=" . Constants::DBNAME . "", Constants::DBUSER, Constants::DBPASS);
-        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->___pdo___ = new PDO("mysql:host=" . Constants::DBHOST . ";dbname=" . Constants::DBNAME . "", Constants::DBUSER, Constants::DBPASS);
+        $this->___pdo___->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+
+    public function ___get_total_count(): ?int
+    {
+        return $this->___total_count;
     }
 
     public function model_to_array(): array
     {
         $array = [];
         foreach (get_object_vars($this) as $key => $value) {
-            if (is_object($value) || is_array($value) || $key === "__table_name__") {
+            if (in_array($key, $this->___not_columns___)) {
                 continue;
             }
             $array[$key] = $value;
@@ -68,7 +81,7 @@ class Model
         }
 
         $sql = "INSERT INTO `$this->__table_name__` ($columns) VALUES ($params)";
-        $statement = $this->pdo->prepare($sql);
+        $statement = $this->___pdo___->prepare($sql);
 
         foreach ($values as $param => &$val) {
             $statement->bindParam($param, $val);
@@ -76,7 +89,7 @@ class Model
 
         $statement->execute();
 
-        $this->find_by_id($this->pdo->lastInsertId());
+        $this->find_by_id($this->___pdo___->lastInsertId());
         return $this;
     }
 
@@ -115,14 +128,6 @@ class Model
             $sql .= " ORDER BY $order_by";
         }
 
-        if (isset($limit)) {
-            $sql .= " LIMIT $limit";
-        }
-
-        if (isset($offset)) {
-            $sql .= " OFFSET $offset";
-        }
-
         if (isset($group_by)) {
             $sql .= " GROUP BY $group_by";
         }
@@ -131,7 +136,12 @@ class Model
             $sql .= " $join";
         }
 
-        $statement = $this->pdo->prepare($sql);
+        if (isset($offset) && isset($limit)) {
+            $sql_count = $sql;
+            $sql .= " LIMIT $limit OFFSET $offset";
+        }
+
+        $statement = $this->___pdo___->prepare($sql);
 
         if (isset($where)) {
             foreach ($where as $key => $value) {
@@ -143,14 +153,25 @@ class Model
 
         $data = $statement->fetchAll(PDO::FETCH_ASSOC);
 
+        if (isset($sql_count)) {
+            $statement = $this->___pdo___->prepare($sql_count);
+            $statement->execute();
+            $this->___total_count = $statement->rowCount();
+        }
+
+        $parsed_data = [];
         if ($use_parser) {
-            $parsed_data = [];
             foreach ($data as $value) {
                 $this->array_to_model($value);
                 $parsed_data[] = $this->parser($use_parser);
             }
-            $data = $parsed_data;
+        } else {
+            foreach ($data as $value) {
+                $this->array_to_model($value);
+                $parsed_data[] = $this;
+            }
         }
+        $data = $parsed_data;
 
         return $data;
     }
@@ -182,7 +203,7 @@ class Model
             return false;
         }
 
-        $statement = $this->pdo->prepare($sql);
+        $statement = $this->___pdo___->prepare($sql);
 
         foreach ($update_values as $param => &$value) {
             $statement->bindValue($param, $value);
@@ -213,7 +234,7 @@ class Model
             return false;
         }
 
-        $statement = $this->pdo->prepare($sql);
+        $statement = $this->___pdo___->prepare($sql);
 
         foreach ($update_values as $param => &$value) {
             $statement->bindValue($param, $value);
@@ -233,7 +254,7 @@ class Model
         $data = $this->select(["id" => $id]);
 
         if (!empty($data)) {
-            $this->array_to_model($data[0]);
+            $this->array_to_model(get_object_vars($data[0]));
         }
         return $this;
     }

@@ -9,4 +9,6 @@ class Constants
     public CONST DBNAME = "exemplo";
     public CONST DBUSER = "root";
     public CONST DBPASS = "root";
+    public CONST VIEWS = __DIR__ . "/Views/";
+    public CONST PUBLIC = __DIR__ . "/Public/";
 }

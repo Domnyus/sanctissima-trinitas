@@ -1,6 +1,6 @@
 <?php
 
-namespace Domnyus\Model;
+namespace Domnyus\Models;
 
 use Domnyus\Model;
 
