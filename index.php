@@ -6,5 +6,5 @@ use Domnyus\Configuration;
 
 $_SERVER["REQUEST_URI"] = str_replace("/Domnyus/", "", $_SERVER["REQUEST_URI"]);
 
-(new Configuration(true, true, true));
+(new Configuration(false, false, false));
 

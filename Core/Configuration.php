@@ -139,34 +139,43 @@ class Configuration
 
     private function redirect() : void
     {
-        $views = (new VIEWS())->select(use_parser: true);
         $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
         $uri = explode("/", $uri);
+        $views = (new VIEWS())->select([
+            "uri" => $uri[0]
+        ], use_parser: true);
 
-        $match = array_filter($views, function ($view) use ($uri) {
+        $matches = array_filter($views, function ($view) use ($uri) {
             return isset($uri[0]) && $uri[0] === $view["uri"];
         });
 
-        if (empty($match)) {
+        if (empty($matches)) {
             exit("Not Found!");
             //include 404
         }
 
-        $match = array_shift($match);
+        $paths = [];
+        $routes = [];
 
-        $view = (new (Constants::NAMESPACE_CONTROLLERS . $match["class"])());
+        foreach ($matches as $match) {
+            $paths[$uri[0] . $match["path"]] = $uri[0] . $match["path"];
+            if (!in_array($uri[0] . $match["path"], $routes)) {
+                $routes[$uri[0] . $match["path"]] = [
+                    "class" => (Constants::NAMESPACE_CONTROLLERS . $match["class"]),
+                    "view" => $match["view"],
+                    "method" => $match["method"]
+                ];
+            }
+        }
 
-        if (!file_exists(Constants::VIEWS . $match["view"])) {
+        $path = (new Path($paths))->check_path();
+        if (empty($paths)) {
             exit("Not Found!");
             //404
-        }
-
-        if (method_exists($view, $match["method"])) {
-            $view->set_view(Constants::VIEWS . $match["view"]);
-            $view->{$match["method"]}();
         } else {
-            exit("Not Found!");
-            //include 404
+            $view = (new ($routes[$path]["class"])());
+            $view->set_view($routes[$path]["view"]);
+            $view->{$routes[$path]["method"]}();
         }
     }
 }

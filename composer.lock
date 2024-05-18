@@ -1,4 +1,16 @@
 {
+    "name": "sanctus_domus/sancta_trinitas",
+    "description": "A simple API framework for PHP.",
+    "type": "project",
+    "keywords": ["simple", "api", "framework", "php"],
+    "authors": [
+        {
+            "name": "Jonas Santos Menezes",
+            "email": "domnyus@gmail.com",
+            "homepage": "https://github.com/Domnyus",
+            "role": "Developer"
+        }
+    ],
     "_readme": [
         "This file locks the dependencies of your project to a known state",
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",

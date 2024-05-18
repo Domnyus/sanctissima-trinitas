@@ -8,6 +8,7 @@ class VIEWS extends Model
 {
     protected ?int $id;
     protected ?string $uri;
+    protected ?string $path;
     protected ?string $method;
     protected ?string $class;
     protected ?string $view;
@@ -16,6 +17,7 @@ class VIEWS extends Model
         parent::__construct(strtolower(basename(__CLASS__)));
         $this->id = null;
         $this->uri = null;
+        $this->path = null;
         $this->method = null;
         $this->class = null;
         $this->view = null;
@@ -26,6 +28,7 @@ class VIEWS extends Model
         return [
             "id"=> $this->id,
             "uri"=> $this->uri,
+            "path"=> $this->path,
             "class"=> $this->class,
             "view"=> $this->view,
             "method"=> $this->method
@@ -36,6 +39,8 @@ class VIEWS extends Model
     public function set_id (?int $id) : VIEWS { $this->id = $id; return $this; }
     public function get_uri () : string|null { return $this->uri ; }
     public function set_uri (?string $uri) : VIEWS { $this->uri = $uri; return $this; }
+    public function get_path () : string|null { return $this->path ; }
+    public function set_path (?string $path) : VIEWS { $this->path = $path; return $this; }
     public function get_method () : string | null { return $this->method ; }
     public function set_method (?string $method)  : VIEWS { $this->method = $method; return $this; }
     public function get_class () : string | null { return $this->class ; }
