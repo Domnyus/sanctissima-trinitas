@@ -15,7 +15,6 @@ id int primary key auto_increment,
 path varchar(255),
 method varchar(255),
 route varchar(255),
-method varchar(255),
 file varchar(255)
 );
 
