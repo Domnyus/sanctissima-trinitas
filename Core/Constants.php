@@ -10,5 +10,6 @@ class Constants
     public CONST DBUSER = "root";
     public CONST DBPASS = "root";
     public CONST VIEWS = __DIR__ . "/Views/";
+    public CONST NAMESPACE_CONTROLLERS = "Domnyus\\Controllers\\";
     public CONST PUBLIC = __DIR__ . "/Public/";
 }
