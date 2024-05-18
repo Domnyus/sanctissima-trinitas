@@ -11,19 +11,30 @@ class Configuration
     private array $tokens = [
         "ZXg6ZXg="
     ];
+    private array $views = [
+        [
+            "uri" => "",
+            "path" => "",
+            "class" => "__Home",
+            "method" => "index",
+            "view" => Constants::VIEWS . "index.php"
+        ]
+    ];
 
     public function __construct(
         bool $use_authentication = false,
         bool $auth_from_array = true,
-        bool $auth_from_database = false
+        bool $auth_from_database = false,
+        bool $view_from_array = true,
+        bool $view_from_database = false
     ) {
 
         $config = [
             "" => function ($api_auth_id) {
                 (new API($api_auth_id));
             },
-            "system" => function () {
-                $this->redirect();
+            "system" => function () use ($view_from_array, $view_from_database) {
+                $this->redirect($view_from_array, $view_from_database);
             }
         ];
 
@@ -137,13 +148,29 @@ class Configuration
         }
     }
 
-    private function redirect() : void
-    {
+    private function redirect(
+        bool $view_from_array = true,
+        bool $view_from_database = false
+    ) : void {
         $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
         $uri = explode("/", $uri);
-        $views = (new VIEWS())->select([
-            "uri" => $uri[0]
-        ], use_parser: true);
+
+        $views = [];
+
+        if ($view_from_array) {
+            $views = array_merge($this->views, $views);
+        }
+        
+        if ($view_from_database) {
+            $vs = (new VIEWS())->select([
+                "uri" => $uri[0]
+            ], use_parser: true);
+
+            foreach ($vs as $v) {
+                $v["from"] = "database";
+                $views[] = $v;
+            }
+        }
 
         $matches = array_filter($views, function ($view) use ($uri) {
             return isset($uri[0]) && $uri[0] === $view["uri"];
@@ -163,7 +190,8 @@ class Configuration
                 $routes[$uri[0] . $match["path"]] = [
                     "class" => (Constants::NAMESPACE_CONTROLLERS . $match["class"]),
                     "view" => $match["view"],
-                    "method" => $match["method"]
+                    "method" => $match["method"],
+                    "from" => $match["from"] ?? "array"
                 ];
             }
         }
