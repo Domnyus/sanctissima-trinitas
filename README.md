@@ -1,6 +1,8 @@
 # sancta-trinitas V 0.3
 Light PHP API Framework
 
+# You may notice some similarities with CodeIgniter 3
+
 # Table SQL from exemple
 Check SQL file
 
