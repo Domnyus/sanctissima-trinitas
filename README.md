@@ -4,6 +4,9 @@ Light PHP API Framework
 # Table SQL from exemple
 Check SQL file
 
+# Paths
+By default paths use :variable to set path variables, but you can change in Path class the character in strstr with ":".
+
 # API Routing
 Paths should start with '/' e.g.: "/login"
 Method is the HTTP Method
