@@ -1,4 +1,4 @@
-# sancta-trinitas
+# sancta-trinitas V 0.3
 Light PHP API Framework
 
 # Table SQL from exemple
